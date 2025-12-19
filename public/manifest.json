@@ -1,0 +1,26 @@
+{
+  "name": "NutriSnap AI - 智能饮食助手",
+  "short_name": "NutriSnap",
+  "description": "极速记录 + 场景化决策，专为便利店、食堂、外卖场景设计的饮食管理助手",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle", "utilities"],
+  "screenshots": []
+}
