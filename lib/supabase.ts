@@ -121,7 +121,7 @@ export async function getUserProfile(): Promise<Profile | null> {
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
     
     if (existingByUser) return existingByUser
     
@@ -130,7 +130,7 @@ export async function getUserProfile(): Promise<Profile | null> {
       .from('profiles')
       .select('*')
       .eq('device_id', deviceId)
-      .single()
+      .maybeSingle()
     
     console.log('[getUserProfile] existingByDevice:', existingByDevice, 'error:', error)
     
@@ -141,7 +141,7 @@ export async function getUserProfile(): Promise<Profile | null> {
         .update({ user_id: user.id, email: user.email })
         .eq('id', existingByDevice.id)
         .select()
-        .single()
+        .maybeSingle()
       
       console.log('[getUserProfile] Linked profile to user:', updated, updateError)
       return updated || existingByDevice
@@ -156,7 +156,7 @@ export async function getUserProfile(): Promise<Profile | null> {
         email: user.email
       })
       .select()
-      .single()
+      .maybeSingle()
     
     return newProfile
   } else {
