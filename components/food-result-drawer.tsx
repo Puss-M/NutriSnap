@@ -20,10 +20,15 @@ export function FoodResultDrawer({ open, onClose, onSaved }: FoodResultDrawerPro
   const [adjustedFoods, setAdjustedFoods] = useState<RecognizedFood[]>([])
   const [isSaving, setIsSaving] = useState(false)
 
+  // Debug logging
+  console.log('[Drawer] open:', open, 'currentFoods:', currentFoods?.length, 'adjustedFoods:', adjustedFoods?.length)
+
   // FIX: Use useEffect to sync adjustedFoods when currentFoods changes
   useEffect(() => {
+    console.log('[Drawer Effect] currentFoods changed:', currentFoods)
     if (currentFoods && currentFoods.length > 0) {
       setAdjustedFoods([...currentFoods])
+      console.log('[Drawer Effect] Updated adjustedFoods:', currentFoods.length)
     }
   }, [currentFoods])
 
