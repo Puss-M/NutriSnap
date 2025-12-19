@@ -133,7 +133,7 @@ ${antiPatterns}
 `
 
     const result = streamText({
-      model: deepseek('Qwen/Qwen2.5-72B-Instruct'),
+      model: deepseek('Qwen/Qwen2.5-7B-Instruct'),
       messages,
       system: systemPrompt,
     })
