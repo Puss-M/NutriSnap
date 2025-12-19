@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { generateText } from 'ai'
 import knowledgeBase from '@/lib/nutrition-knowledge.json'
 
 // export const runtime = 'edge' // Use default nodejs runtime for better compatibility
@@ -132,13 +132,15 @@ ${antiPatterns}
 - 鼓励 > 批评
 `
 
-    const result = streamText({
+    const result = await generateText({
       model: deepseek('Qwen/Qwen2.5-7B-Instruct'),
       messages,
       system: systemPrompt,
     })
 
-    return result.toTextStreamResponse()
+    return new Response(result.text, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    })
     
   } catch (error: any) {
     console.error('Chat API Error:', error)
