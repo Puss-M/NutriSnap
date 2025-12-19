@@ -86,7 +86,12 @@ export default function ChatPage() {
         })
       })
 
-      if (!response.ok) throw new Error('Network error')
+      // Check for HTTP errors and parse error message
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const errorMsg = errorData?.error || `服务器错误 (${response.status})`
+        throw new Error(errorMsg)
+      }
       if (!response.body) throw new Error('No response body')
 
       // 3. Handle Stream
