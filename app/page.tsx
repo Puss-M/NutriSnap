@@ -24,7 +24,9 @@ export default function HomePage() {
   const progress = Math.min(100, (todayCalories / caloriesTarget) * 100)
 
   const refreshTotals = async () => {
+    console.log('[HomePage] refreshTotals called')
     const logs = await getTodayLogs()
+    console.log('[HomePage] Got logs:', logs.length, logs)
     const totals = logs.reduce(
       (acc, log) => ({
         calories: acc.calories + log.calories,
@@ -34,6 +36,7 @@ export default function HomePage() {
       }),
       { calories: 0, protein: 0, carbs: 0, fat: 0 }
     )
+    console.log('[HomePage] Updating totals:', totals)
     updateTodayTotals(totals.calories, totals.protein, totals.carbs, totals.fat)
   }
 
