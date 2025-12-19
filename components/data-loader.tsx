@@ -30,8 +30,20 @@ export function DataLoader({ children }: { children: React.ReactNode }) {
           
           const targets = calculateNutritionTargets(userMetrics)
           console.log('[DataLoader] Calculated personalized targets:', targets)
-          setCaloriesTarget(targets.calories)
-          setMacroTargets(targets.protein, targets.carbs, targets.fat)
+          
+          // Validate targets - fallback to defaults if NaN
+          if (targets.calories && !isNaN(targets.calories)) {
+            setCaloriesTarget(targets.calories)
+            setMacroTargets(
+              isNaN(targets.protein) ? 99 : targets.protein, 
+              isNaN(targets.carbs) ? 390 : targets.carbs, 
+              isNaN(targets.fat) ? 54 : targets.fat
+            )
+          } else {
+            console.warn('[DataLoader] Invalid targets, using defaults')
+            setCaloriesTarget(profile.daily_calories_target || 2000)
+            setMacroTargets(66, 316, 57)
+          }
         } else {
           // Fallback to default if no profile data
           setCaloriesTarget(profile.daily_calories_target || 2000)
