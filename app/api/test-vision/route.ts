@@ -24,7 +24,7 @@ export async function GET() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'Qwen/Qwen2.5-VL-7B-Instruct',
+        model: 'Pro/Qwen/Qwen2-VL-72B-Instruct',
         messages: [
           {
             role: 'user',
