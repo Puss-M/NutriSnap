@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { openai } from '@ai-sdk/openai'
+import { createOpenAI } from '@ai-sdk/openai'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { FOOD_RECOGNITION_PROMPT } from '@/lib/prompts'
@@ -17,6 +17,12 @@ const foodSchema = z.object({
     confidence: z.number(),
     tips: z.string()
   }))
+})
+
+// Configure Silicon Flow provider
+const siliconFlow = createOpenAI({
+  baseURL: 'https://api.siliconflow.cn/v1',
+  apiKey: process.env.SILICON_FLOW_API_KEY,
 })
 
 /**
@@ -68,10 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Using Silicon Flow API (OpenAI-compatible)
-    const model = openai('Pro/Qwen/Qwen2-VL-72B-Instruct', {
-      baseURL: 'https://api.siliconflow.cn/v1',
-      apiKey: process.env.SILICON_FLOW_API_KEY
-    })
+    const model = siliconFlow('Pro/Qwen/Qwen2-VL-72B-Instruct')
 
     console.log('[AI Service] Calling vision model for food recognition...')
     
