@@ -131,6 +131,44 @@ export default function ChatPage() {
   }
 
   const userGoal = userProfile?.goal || '维持'
+  
+  // Proactive briefing based on time of day
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 11) {
+      return {
+        greeting: '☀️ 早上好！',
+        message: `今天目标 ${userGoal}，需要摄入 ${Math.round(proteinTarget)}g 蛋白质。早餐建议先完成 30-40g。`,
+        quickPrompt: `今天早餐吃什么能快速补充 30g 蛋白质？我在${selectedScenario || '便利店'}。`,
+        emoji: '🌅'
+      }
+    } else if (hour < 17) {
+      const remainingProtein = Math.round(macroDeficit.protein)
+      if (remainingProtein > 40) {
+        return {
+          greeting: '⏰ 下午提醒',
+          message: `你今日蛋白质仅摄入了 ${Math.round(todayProtein)}g，距离目标还差 ${remainingProtein}g。建议晚餐前加一餐！`,
+          quickPrompt: `下午加餐吃什么？需要补 ${Math.min(remainingProtein/2, 25)}g 蛋白质，在${selectedScenario || '便利店'}。`,
+          emoji: '🕐'
+        }
+      }
+      return {
+        greeting: '💪 进度不错！',
+        message: `你今日蛋白质已摄入 ${Math.round(todayProtein)}g，还差 ${remainingProtein}g。继续保持！`,
+        quickPrompt: `午餐/晚餐吃什么能补够剩下的 ${remainingProtein}g 蛋白质？`,
+        emoji: '✨'
+      }
+    } else {
+      return {
+        greeting: '🌙 晚上好！',
+        message: `今日还差 ${Math.round(macroDeficit.protein)}g 蛋白质。晚餐是补齐缺口的最后机会！`,
+        quickPrompt: `晚餐吃什么能补齐剩下的 ${Math.round(macroDeficit.protein)}g 蛋白质？在${selectedScenario || '外卖'}。`,
+        emoji: '🍽️'
+      }
+    }
+  }
+
+  const timeGreeting = getTimeBasedGreeting()
 
   return (
     <div className="min-h-screen bg-white">
@@ -144,14 +182,14 @@ export default function ChatPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl font-extrabold text-zinc-900">🧠 AI 营养助手</h1>
+              <h1 className="text-xl font-extrabold text-zinc-900">🧠 AI 营养助手 · 小营</h1>
               <p className="text-xs text-zinc-500 font-medium">基于 RAG 的智能饮食顾问</p>
             </div>
           </div>
           
           {/* Scenario Pills */}
           <div className="mb-3">
-            <h3 className="text-xs font-bold text-zinc-600 mb-2">📍 你在哪里吃？(必选)</h3>
+            <h3 className="text-xs font-bold text-zinc-600 mb-2">📍 你在哪里吃？</h3>
             <ScenarioPills selected={selectedScenario} onSelect={setSelectedScenario} />
           </div>
           
@@ -174,23 +212,38 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Quick Questions (Only show when no messages) */}
+        {/* Proactive Briefing + Quick Questions (Only show when no messages) */}
         {messages.length === 0 && (
-          <div className="px-4 py-3 bg-zinc-50 border-b flex-none">
-            <h3 className="text-xs font-bold text-zinc-700 mb-2 flex items-center gap-1.5">
-              💡 智能提问 
+          <div className="px-4 py-3 bg-zinc-50 border-b flex-none space-y-3">
+            {/* Proactive Greeting Card */}
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-3 border border-emerald-100">
+              <div className="text-sm font-bold text-emerald-800 mb-1">{timeGreeting.greeting}</div>
+              <p className="text-xs text-emerald-700">{timeGreeting.message}</p>
+            </div>
+            
+            <h3 className="text-xs font-bold text-zinc-700 flex items-center gap-1.5">
+              {timeGreeting.emoji} 快速提问 
             </h3>
             <div className="space-y-2">
-              {/* Context-aware Dynamic Prompt */}
-              {macroDeficit.protein > 10 && (
+              {/* Time-based Smart Prompt */}
+              <button
+                onClick={() => handleManualSubmit(undefined, timeGreeting.quickPrompt)}
+                className="w-full text-left px-3 py-3 bg-white hover:bg-blue-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
+              >
+                <span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg group-hover:bg-blue-200 transition-colors">⚡️</span>
+                <span>
+                  在 <b>{selectedScenario || '便利店'}</b> 怎么补 <span className="font-bold text-blue-600">{Math.round(macroDeficit.protein)}g蛋白质</span> ？
+                </span>
+              </button>
+              
+              {/* Training Day Question (for Carb Cycling) */}
+              {userGoal === '增肌' && (
                 <button
-                  onClick={() => handleManualSubmit(undefined, `我在${selectedScenario || '便利店'}，还需要补${Math.round(macroDeficit.protein)}g蛋白质，推荐吃什么？`)}
-                  className="w-full text-left px-3 py-3 bg-white hover:bg-blue-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
+                  onClick={() => handleManualSubmit(undefined, '今天是我的训练日，碳水应该怎么安排？推荐训练前后吃什么？')}
+                  className="w-full text-left px-3 py-3 bg-white hover:bg-amber-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
                 >
-                  <span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg group-hover:bg-blue-200 transition-colors">⚡️</span>
-                  <span>
-                    在 <b>{selectedScenario || '便利店'}</b> 怎么补 <span className="font-bold text-blue-600">{Math.round(macroDeficit.protein)}g蛋白质</span> ？
-                  </span>
+                  <span className="bg-amber-100 text-amber-600 p-1.5 rounded-lg group-hover:bg-amber-200 transition-colors">🏋️</span>
+                  今天是训练日，碳水怎么安排？
                 </button>
               )}
               

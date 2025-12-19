@@ -1,0 +1,151 @@
+{
+  "highProteinFoods": [
+    {
+      "id": "chicken_breast",
+      "name": "即食鸡胸肉/鸡腿排",
+      "protein_per_100g": 27,
+      "calories_per_100g": 130,
+      "tags": ["convenience_store", "supermarket", "high_protein", "budget_friendly"],
+      "brands": ["优形", "肌肉小王子", "鲨鱼菲特"],
+      "notes": "便利店常见，高蛋白低脂，增肌减脂皆宜"
+    },
+    {
+      "id": "skim_milk",
+      "name": "脱脂牛奶",
+      "protein_per_100ml": 3.4,
+      "calories_per_100ml": 35,
+      "tags": ["convenience_store", "supermarket", "budget_friendly"],
+      "brands": ["光明", "伊利", "蒙牛"],
+      "notes": "便宜易得，可配蛋白粉"
+    },
+    {
+      "id": "greek_yogurt",
+      "name": "希腊酸奶 (无糖)",
+      "protein_per_100g": 9,
+      "calories_per_100g": 60,
+      "tags": ["convenience_store", "supermarket", "high_protein"],
+      "brands": ["简爱", "吾岛", "乐纯"],
+      "notes": "选无糖版本，减脂期优选"
+    },
+    {
+      "id": "boiled_egg",
+      "name": "卤蛋/茶叶蛋",
+      "protein_per_unit": 7,
+      "calories_per_unit": 80,
+      "tags": ["convenience_store", "canteen", "budget_friendly"],
+      "brands": [],
+      "notes": "随处可见，性价比极高"
+    },
+    {
+      "id": "protein_bar",
+      "name": "蛋白棒",
+      "protein_per_unit": 18,
+      "calories_per_unit": 200,
+      "tags": ["convenience_store", "online", "portable"],
+      "brands": ["PhD", "Quest", "肌肉科技"],
+      "notes": "便携应急，但价格较高"
+    },
+    {
+      "id": "soy_milk",
+      "name": "豆浆 (无糖)",
+      "protein_per_100ml": 3.0,
+      "calories_per_100ml": 30,
+      "tags": ["convenience_store", "canteen", "budget_friendly", "plant_based"],
+      "brands": ["永和"],
+      "notes": "植物蛋白来源，素食者可用"
+    },
+    {
+      "id": "tuna_canned",
+      "name": "金枪鱼罐头 (水浸)",
+      "protein_per_100g": 23,
+      "calories_per_100g": 100,
+      "tags": ["supermarket", "high_protein", "storage_friendly"],
+      "brands": ["中粮", "雄鸡标"],
+      "notes": "选水浸而非油浸，减脂期优选"
+    },
+    {
+      "id": "beef_jerky",
+      "name": "牛肉干",
+      "protein_per_100g": 40,
+      "calories_per_100g": 300,
+      "tags": ["convenience_store", "supermarket", "portable"],
+      "brands": ["三只松鼠", "良品铺子"],
+      "notes": "蛋白密度高但价格贵，注意钠含量"
+    }
+  ],
+  "antiPatterns": [
+    {
+      "id": "flavored_yogurt",
+      "name": "风味酸奶 (果粒/调味)",
+      "issue": "high_sugar",
+      "sugar_per_100g": 12,
+      "warning": "虽然蛋白质不错，但添加糖极高（每100g含12-15g糖），不利于减脂。建议换成无糖希腊酸奶。"
+    },
+    {
+      "id": "cereal_bars",
+      "name": "早餐麦片棒/谷物棒",
+      "issue": "hidden_sugar",
+      "sugar_per_100g": 25,
+      "warning": "看似健康实则是隐藏糖炸弹。每100g含糖可达25g，不推荐减脂期食用。"
+    },
+    {
+      "id": "salad_dressing",
+      "name": "沙拉酱 (千岛酱/凯撒酱)",
+      "issue": "high_fat",
+      "fat_per_100g": 50,
+      "warning": "一小勺就含10g以上脂肪。建议改用油醋汁或直接吃蔬菜。"
+    },
+    {
+      "id": "fruit_juice",
+      "name": "鲜榨果汁/果汁饮料",
+      "issue": "high_sugar",
+      "sugar_per_100ml": 10,
+      "warning": "即使是100%鲜榨，也是浓缩糖分且缺少纤维。建议直接吃水果。"
+    },
+    {
+      "id": "fried_chicken_skin",
+      "name": "炸鸡/鸡排带皮",
+      "issue": "hidden_fat",
+      "fat_per_100g": 20,
+      "warning": "鸡皮和面衣吸油严重。如果在减脂期，务必去皮去衣。"
+    },
+    {
+      "id": "instant_noodles",
+      "name": "方便面",
+      "issue": "high_sodium_high_fat",
+      "sodium_per_pack": 2000,
+      "warning": "一包含钠量接近全天上限，油炸面饼脂肪高。偶尔可吃，但别当主食。"
+    },
+    {
+      "id": "bubble_tea",
+      "name": "奶茶 (珍珠奶茶)",
+      "issue": "extreme_sugar",
+      "sugar_per_cup": 50,
+      "warning": "一杯奶茶含糖可达50g（10颗方糖）。减脂期请远离或选无糖去冰无加料。"
+    }
+  ],
+  "dietPrinciples": {
+    "muscle_gain": [
+      "热量盈余: 每日摄入 > TDEE + 300kcal",
+      "碳水充足: 训练前后必须补充碳水，促进胰岛素分泌和糖原恢复",
+      "蛋白质分餐: 每餐摄入25-30g蛋白质吸收效率最高，不要一顿吃完",
+      "碳水循环: 训练日高碳水，休息日低碳水高脂肪"
+    ],
+    "fat_loss": [
+      "热量缺口: 每日摄入 < TDEE - 500kcal",
+      "高蛋白: 防止肌肉流失，利用食物热效应",
+      "把控油脂: 严格控制烹饪油和隐形脂肪（如坚果、沙拉酱）",
+      "优先蔬菜: 增加饱腹感，减少热量摄入"
+    ]
+  },
+  "contextTags": {
+    "convenience_store": "便利店可见",
+    "supermarket": "超市可见",
+    "canteen": "食堂常见",
+    "online": "网购/外卖",
+    "high_protein": "高蛋白优选",
+    "budget_friendly": "性价比高",
+    "portable": "便携",
+    "plant_based": "素食可用"
+  }
+}
