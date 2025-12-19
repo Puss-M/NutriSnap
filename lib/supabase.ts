@@ -11,10 +11,53 @@ export const isConfigured =
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 
-// Database types
+// ============ AUTH FUNCTIONS ============
+
+// Sign up with email and password
+export async function signUp(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+  if (error) throw error
+  return data
+}
+
+// Sign in with email and password
+export async function signIn(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (error) throw error
+  return data
+}
+
+// Sign out
+export async function signOut() {
+  const { error } = await supabase.auth.signOut()
+  if (error) throw error
+}
+
+// Get current user
+export async function getUser() {
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+}
+
+// Listen to auth state changes
+export function onAuthStateChange(callback: (event: string, session: any) => void) {
+  return supabase.auth.onAuthStateChange(callback)
+}
+
+
+// ============ DATABASE TYPES ============
+
 export interface Profile {
   id: string
+  user_id?: string            // NEW: Link to auth.users
   device_id: string
+  email?: string              // NEW: User email for display
   is_vip: boolean
   vip_expiry: string | null
   daily_calories_target: number
@@ -48,7 +91,9 @@ export interface FoodLog {
   created_at: string
 }
 
-// Helper to get or create device ID
+
+// ============ DEVICE ID (Fallback for non-logged-in users) ============
+
 export function getDeviceId(): string {
   if (typeof window === 'undefined') return ''
   
@@ -60,33 +105,94 @@ export function getDeviceId(): string {
   return deviceId
 }
 
-// Get or create user profile
+
+// ============ PROFILE FUNCTIONS ============
+
+// Get or create user profile (supports both auth users and anonymous device users)
 export async function getUserProfile(): Promise<Profile | null> {
+  // First, check if user is logged in
+  const user = await getUser()
+  
+  if (user) {
+    // Logged-in user: fetch by user_id
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+    
+    if (existing) return existing
+    
+    // Create new profile for authenticated user
+    const deviceId = getDeviceId()
+    const { data: newProfile } = await supabase
+      .from('profiles')
+      .insert({ 
+        user_id: user.id,
+        device_id: deviceId,
+        email: user.email
+      })
+      .select()
+      .single()
+    
+    return newProfile
+  } else {
+    // Anonymous user: use device_id
+    const deviceId = getDeviceId()
+    
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('device_id', deviceId)
+      .is('user_id', null)
+      .single()
+    
+    if (existing) return existing
+    
+    // Create new anonymous profile
+    const { data: newProfile } = await supabase
+      .from('profiles')
+      .insert({ device_id: deviceId })
+      .select()
+      .single()
+    
+    return newProfile
+  }
+}
+
+// Link anonymous profile to authenticated user (call after login)
+export async function linkProfileToUser(userId: string, email: string): Promise<void> {
   const deviceId = getDeviceId()
   
-  const { data: existing } = await supabase
+  // Check if there's an existing anonymous profile
+  const { data: anonProfile } = await supabase
     .from('profiles')
     .select('*')
     .eq('device_id', deviceId)
+    .is('user_id', null)
     .single()
   
-  if (existing) return existing
-  
-  // Create new profile
-  const { data: newProfile } = await supabase
-    .from('profiles')
-    .insert({ device_id: deviceId })
-    .select()
-    .single()
-  
-  return newProfile
+  if (anonProfile) {
+    // Link the anonymous profile to this user
+    await supabase
+      .from('profiles')
+      .update({ user_id: userId, email })
+      .eq('id', anonProfile.id)
+  }
 }
 
-// Save food log
+
+// ============ FOOD LOG FUNCTIONS ============
+
 export async function saveFoodLog(log: Omit<FoodLog, 'id' | 'created_at' | 'user_id'>) {
+  const user = await getUser()
+  
   const { data, error } = await supabase
     .from('logs')
-    .insert(log)
+    .insert({
+      ...log,
+      user_id: user?.id || null
+    })
     .select()
     .single()
   
@@ -94,26 +200,35 @@ export async function saveFoodLog(log: Omit<FoodLog, 'id' | 'created_at' | 'user
   return data
 }
 
-// Get today's logs
 export async function getTodayLogs(): Promise<FoodLog[]> {
+  const user = await getUser()
   const deviceId = getDeviceId()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   
-  const { data } = await supabase
+  let query = supabase
     .from('logs')
     .select('*')
-    .eq('device_id', deviceId)
     .gte('created_at', today.toISOString())
     .order('created_at', { ascending: false })
   
+  if (user) {
+    query = query.eq('user_id', user.id)
+  } else {
+    query = query.eq('device_id', deviceId)
+  }
+  
+  const { data } = await query
   return data || []
 }
 
-// Upload image to storage
+
+// ============ STORAGE FUNCTIONS ============
+
 export async function uploadFoodImage(file: File): Promise<string | null> {
-  const deviceId = getDeviceId()
-  const fileName = `${deviceId}/${Date.now()}_${file.name}`
+  const user = await getUser()
+  const folder = user?.id || getDeviceId()
+  const fileName = `${folder}/${Date.now()}_${file.name}`
   
   const { data, error } = await supabase.storage
     .from('food-images')
@@ -130,3 +245,4 @@ export async function uploadFoodImage(file: File): Promise<string | null> {
   
   return publicUrl
 }
+

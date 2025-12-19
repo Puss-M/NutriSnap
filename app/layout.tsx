@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { DataLoader } from "@/components/data-loader";
 import { SetupCheck } from "@/components/setup-check";
+import { AuthProvider } from "@/components/auth-provider";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -43,13 +44,15 @@ export default function RootLayout({
         className={`${inter.className} bg-zinc-100 min-h-screen font-sans antialiased`}
         suppressHydrationWarning
       >
-        <SetupCheck>
-          <DataLoader>
-            <main className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative pb-24">
-              {children}
-            </main>
-          </DataLoader>
-        </SetupCheck>
+        <AuthProvider>
+          <SetupCheck>
+            <DataLoader>
+              <main className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative pb-24">
+                {children}
+              </main>
+            </DataLoader>
+          </SetupCheck>
+        </AuthProvider>
       </body>
     </html>
   );
