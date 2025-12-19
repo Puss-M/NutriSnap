@@ -7,7 +7,7 @@ import { calculateNutritionTargets, type UserMetrics } from '@/lib/calculators'
 import type { ActivityLevel, Goal } from '@/lib/config'
 
 export function DataLoader({ children }: { children: React.ReactNode }) {
-  const { updateTodayTotals, setCaloriesTarget, setVIP } = useAppStore()
+  const { updateTodayTotals, setCaloriesTarget, setMacroTargets, setVIP } = useAppStore()
 
   useEffect(() => {
     async function loadData() {
@@ -24,18 +24,19 @@ export function DataLoader({ children }: { children: React.ReactNode }) {
             age: profile.age,
             gender: profile.gender as '男' | '女',
             activityLevel: profile.activity_level as ActivityLevel,
-            goal: profile.goal as Goal
+            goal: profile.goal as Goal,
+            bodyFat: profile.body_fat
           }
           
           const targets = calculateNutritionTargets(userMetrics)
           console.log('[DataLoader] Calculated personalized targets:', targets)
           setCaloriesTarget(targets.calories)
-          
-          // TODO: Add protein/carbs/fat targets to store in future
-          // For now, they're available via profile
+          setMacroTargets(targets.protein, targets.carbs, targets.fat)
         } else {
           // Fallback to default if no profile data
           setCaloriesTarget(profile.daily_calories_target || 2000)
+          // Set default macro targets for 2000 kcal maintenance
+          setMacroTargets(66, 316, 57)
         }
       }
 

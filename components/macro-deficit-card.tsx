@@ -5,13 +5,10 @@ import { useAppStore } from '@/lib/store'
 import { ArrowDown } from 'lucide-react'
 
 export function MacroDeficitCard() {
-  const { todayProtein, todayCarbs, todayFat } = useAppStore()
-  
-  // TODO: Get targets from profile in future
-  // For now, use reasonable defaults based on 2000 kcal
-  const proteinTarget = 120  // g
-  const carbsTarget = 250    // g  
-  const fatTarget = 55       // g
+  const { 
+    todayProtein, todayCarbs, todayFat,
+    proteinTarget, carbsTarget, fatTarget 
+  } = useAppStore()
   
   const deficits = {
     protein: Math.max(0, proteinTarget - todayProtein),

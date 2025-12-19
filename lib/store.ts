@@ -29,6 +29,11 @@ interface AppState {
   todayFat: number
   caloriesTarget: number
   
+  // Macro targets (from profile calculations)
+  proteinTarget: number
+  carbsTarget: number
+  fatTarget: number
+  
   // Actions
   incrementUsage: () => void
   setVIP: (status: boolean) => void
@@ -36,6 +41,7 @@ interface AppState {
   clearFoodResult: () => void
   updateTodayTotals: (calories: number, protein: number, carbs: number, fat: number) => void
   setCaloriesTarget: (target: number) => void
+  setMacroTargets: (protein: number, carbs: number, fat: number) => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -53,6 +59,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   todayCarbs: 0,
   todayFat: 0,
   caloriesTarget: 2000,
+  
+  // Macro targets - will be updated from profile
+  proteinTarget: 66,  // Default for 55kg 维持
+  carbsTarget: 316,
+  fatTarget: 57,
   
   // Actions
   incrementUsage: () => {
@@ -88,7 +99,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     todayFat: fat
   }),
   
-  setCaloriesTarget: (target) => set({ caloriesTarget: target })
+  setCaloriesTarget: (target) => set({ caloriesTarget: target }),
+  
+  setMacroTargets: (protein, carbs, fat) => set({
+    proteinTarget: protein,
+    carbsTarget: carbs,
+    fatTarget: fat
+  })
 }))
 
 // Helper to check if paywall should show
