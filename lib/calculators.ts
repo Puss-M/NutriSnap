@@ -13,6 +13,7 @@ export interface UserMetrics {
   gender: Gender
   activityLevel: ActivityLevel
   goal: Goal
+  bodyFat?: number    // Optional body fat percentage (0-100)
 }
 
 /**
@@ -76,11 +77,31 @@ export function calculateBMR(metrics: UserMetrics): number {
 }
 
 /**
+ * Calculate BMR using Katch-McArdle Formula
+ * More accurate when body fat percentage is known
+ * BMR = 370 + (21.6 × LBM)
+ * LBM = weight × (1 - bodyFat%)
+ */
+export function calculateBMR_KatchMcArdle(weight: number, bodyFat: number): number {
+  const leanBodyMass = weight * (1 - bodyFat / 100)
+  return Math.round(370 + 21.6 * leanBodyMass)
+}
+
+/**
  * Calculate TDEE (Total Daily Energy Expenditure)
  * TDEE = BMR × Activity Factor
+ * Uses Katch-McArdle if bodyFat is provided, otherwise Mifflin-St Jeor
  */
 export function calculateTDEE(metrics: UserMetrics): number {
-  const bmr = calculateBMR(metrics)
+  let bmr: number
+  
+  // Prefer Katch-McArdle if body fat is provided
+  if (metrics.bodyFat !== undefined && metrics.bodyFat > 0 && metrics.bodyFat < 100) {
+    bmr = calculateBMR_KatchMcArdle(metrics.weight, metrics.bodyFat)
+  } else {
+    bmr = calculateBMR(metrics)
+  }
+  
   const activityFactor = APP_CONFIG.ACTIVITY_FACTORS[metrics.activityLevel]
   return Math.round(bmr * activityFactor)
 }

@@ -26,6 +26,7 @@ export interface Profile {
   gender: string           // '男' or '女'
   activity_level: string
   goal: string             // '增肌', '减脂', '维持'
+  body_fat?: number        // Optional body fat percentage
   
   created_at: string
   updated_at: string

@@ -24,7 +24,8 @@ export default function ProfilePage() {
     age: 20,
     gender: '女',
     activityLevel: '中度活动 (每周3-5次)',
-    goal: '维持'
+    goal: '维持',
+    bodyFat: undefined // Optional
   })
   
   const [loading, setLoading] = useState(false)
@@ -42,7 +43,8 @@ export default function ProfilePage() {
           age: profile.age,
           gender: profile.gender as '男' | '女',
           activityLevel: profile.activity_level as ActivityLevelType,
-          goal: profile.goal as GoalType
+          goal: profile.goal as GoalType,
+          bodyFat: profile.body_fat ?? undefined
         })
       }
     }
@@ -76,6 +78,7 @@ export default function ProfilePage() {
             gender: metrics.gender,
             activity_level: metrics.activityLevel,
             goal: metrics.goal,
+            body_fat: metrics.bodyFat ?? null,
             daily_calories_target: targets.calories,
             updated_at: new Date().toISOString()
           })
@@ -162,6 +165,21 @@ export default function ProfilePage() {
                 <option value="男">男</option>
               </select>
             </div>
+          </div>
+
+          {/* Body Fat Input (Optional) */}
+          <div>
+            <label className="text-xs text-zinc-500 font-medium">体脂率 % (选填，填写后使用更精准的 Katch-McArdle 公式)</label>
+            <Input
+              type="number"
+              placeholder="例如: 15"
+              value={metrics.bodyFat ?? ''}
+              onChange={(e) => setMetrics({ 
+                ...metrics, 
+                bodyFat: e.target.value ? Number(e.target.value) : undefined 
+              })}
+              className="mt-1"
+            />
           </div>
 
           <div>

@@ -19,10 +19,14 @@ CREATE TABLE IF NOT EXISTS profiles (
   gender TEXT DEFAULT '女',                      -- '男' or '女'
   activity_level TEXT DEFAULT '中度活动 (每周3-5次)',
   goal TEXT DEFAULT '维持',                      -- '增肌', '减脂', '维持'
+  body_fat NUMERIC,                              -- Optional body fat percentage (0-100)
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Migration: Add body_fat column if it doesn't exist (for existing databases)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS body_fat NUMERIC;
 
 -- Food logs table
 CREATE TABLE IF NOT EXISTS logs (

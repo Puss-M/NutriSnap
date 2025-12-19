@@ -50,6 +50,7 @@ ${DIET_KNOWLEDGE_BASE}
 # 当前用户档案
 - 性别: ${userProfile?.gender || '未知'}
 - 体重: ${userProfile?.weight || '未知'} kg
+- 体脂率: ${userProfile?.body_fat ? userProfile.body_fat + '%' : '未提供 (使用通用公式)'}
 - 当前目标: 【${userProfile?.goal || '维持'}】
 - 每日蛋白质目标: ${userProfile?.targets?.protein || '未知'} g
 
