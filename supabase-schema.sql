@@ -64,28 +64,33 @@ ALTER TABLE logs ENABLE ROW LEVEL SECURITY;
 -- Drop old policies if they exist
 DROP POLICY IF EXISTS "Allow all for profiles" ON profiles;
 DROP POLICY IF EXISTS "Allow all for logs" ON logs;
+DROP POLICY IF EXISTS "profiles_select" ON profiles;
+DROP POLICY IF EXISTS "profiles_insert" ON profiles;
+DROP POLICY IF EXISTS "profiles_update" ON profiles;
+DROP POLICY IF EXISTS "logs_select" ON logs;
+DROP POLICY IF EXISTS "logs_insert" ON logs;
+DROP POLICY IF EXISTS "logs_delete" ON logs;
 
--- NEW: Policies for authenticated users
--- Profiles: Users can read/write their own profile, anonymous users can use device_id
+-- FIXED: Allow anonymous users (user_id IS NULL) OR authenticated users accessing their own data
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (
-  auth.uid() = user_id OR user_id IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (
-  auth.uid() = user_id OR auth.uid() IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (
-  auth.uid() = user_id OR user_id IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 
--- Logs: Users can manage their own logs
+-- Logs policies
 CREATE POLICY "logs_select" ON logs FOR SELECT USING (
-  auth.uid() = user_id OR user_id IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 CREATE POLICY "logs_insert" ON logs FOR INSERT WITH CHECK (
-  auth.uid() = user_id OR auth.uid() IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 CREATE POLICY "logs_delete" ON logs FOR DELETE USING (
-  auth.uid() = user_id OR user_id IS NULL
+  user_id IS NULL OR auth.uid() = user_id
 );
 
 -- Storage bucket for food images
