@@ -247,6 +247,24 @@ export default function ChatPage() {
                 </button>
               )}
               
+              {/* Cheat Meal Support - NEW */}
+              <button
+                onClick={() => handleManualSubmit(undefined, '我今天想吃顿火锅放松一下，怎么把伤害降到最低？')}
+                className="w-full text-left px-3 py-3 bg-white hover:bg-red-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
+              >
+                <span className="bg-red-100 text-red-600 p-1.5 rounded-lg group-hover:bg-red-200 transition-colors">🍲</span>
+                想吃顿火锅放松一下！
+              </button>
+              
+              {/* Shopping List Generator - NEW */}
+              <button
+                onClick={() => handleManualSubmit(undefined, `请帮我生成一份本周${userGoal}饮食的购物清单，按超市分区分类。`)}
+                className="w-full text-left px-3 py-3 bg-white hover:bg-purple-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
+              >
+                <span className="bg-purple-100 text-purple-600 p-1.5 rounded-lg group-hover:bg-purple-200 transition-colors">🛒</span>
+                生成本周购物清单
+              </button>
+              
               <button
                 onClick={() => handleManualSubmit(undefined, `请根据我的${userGoal}目标，为我推荐一份科学的${selectedScenario || '外卖'}晚餐搭配。`)}
                 className="w-full text-left px-3 py-3 bg-white hover:bg-emerald-50 rounded-xl border border-zinc-100 text-xs text-zinc-700 transition-all active:scale-95 shadow-sm flex items-center gap-2 group"
