@@ -22,6 +22,7 @@ export default function ChatPage() {
   const { todayProtein, todayCarbs, todayFat, caloriesTarget } = useAppStore()
   const [userProfile, setUserProfile] = useState<any>(null)
   const [isProfileLoading, setIsProfileLoading] = useState(true)
+  const [envStatus, setEnvStatus] = useState<'loading' | 'ok' | 'missing'>('loading')
   
   // Manual State
   const [messages, setMessages] = useState<Message[]>([])
@@ -39,10 +40,20 @@ export default function ChatPage() {
     fat: Math.max(0, fatTarget - todayFat)
   }
 
-  // Load full user profile for context
+  // Load full user profile for context AND check Env
   useEffect(() => {
-    async function loadContext() {
+    async function loadData() {
       try {
+        // 1. Check Env
+        fetch('/api/debug-auth').then(res => res.json()).then(data => {
+            if (data?.env_check?.SILICON_FLOW_API_KEY?.includes('Present')) {
+                setEnvStatus('ok')
+            } else {
+                setEnvStatus('missing')
+            }
+        }).catch(() => setEnvStatus('missing'))
+
+        // 2. Load Profile
         const profile = await getUserProfile()
         if (profile) {
           setUserProfile(profile)
@@ -53,7 +64,7 @@ export default function ChatPage() {
         setIsProfileLoading(false)
       }
     }
-    loadContext()
+    loadData()
   }, [])
 
   // Manual submit handler with streaming support
@@ -67,6 +78,9 @@ export default function ChatPage() {
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
 
     try {
       // 2. Call API
@@ -83,8 +97,11 @@ export default function ChatPage() {
             goal: userProfile?.goal || '维持', 
             targets: { protein: Math.round(proteinTarget) }
           }
-        })
+        }),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       // Check for HTTP errors and parse error message
       if (!response.ok) {
@@ -117,11 +134,16 @@ export default function ChatPage() {
         })
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      setMessages(prev => [...prev, { role: 'assistant', content: '抱歉，网络出了点小差错，请稍后再试。' }])
+      const errorMessage = error.name === 'AbortError' 
+        ? '请求超时 (15秒)。AI 响应太慢，请检查 API Key 配置或稍后再试。' 
+        : `出错了: ${error.message || '网络错误'}`
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMessage }])
     } finally {
       setIsLoading(false)
+      clearTimeout(timeoutId)
     }
   }
 
@@ -191,6 +213,15 @@ export default function ChatPage() {
               <p className="text-xs text-zinc-500 font-medium">基于 RAG 的智能饮食顾问</p>
             </div>
           </div>
+
+          {/* Setup Warning */}
+          {envStatus === 'missing' && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 animate-in fade-in slide-in-from-top-2">
+              <p className="font-bold mb-1">⚠️ 缺少服务器配置</p>
+              请在 Vercel/部署后台添加环境变量：<br/>
+              <code className="bg-red-100 px-1 py-0.5 rounded">SILICON_FLOW_API_KEY</code>
+            </div>
+          )}
           
           {/* Scenario Pills */}
           <div className="mb-3">
