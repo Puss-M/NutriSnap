@@ -75,10 +75,20 @@ export async function POST(req: NextRequest) {
             content: [
               {
                 type: 'text',
-                text: `请分析这张食物图片，用JSON格式返回结果。
-格式: {"foods":[{"name":"食物名","weight_g":重量,"calories":热量,"protein":蛋白质,"carbs":碳水,"fat":脂肪,"confidence":0.8,"tips":"一句话点评"}]}
-场景: ${context || '未知'}
-只返回JSON，不要其他文字。`
+                text: `你是一个专业的营养分析师。请识别这张图片中的所有食物，并估算每种食物的营养成分。
+
+要求：
+1. 识别图片中的所有食物
+2. 估算每种食物的重量(克)
+3. 计算每种食物的热量(kcal)、蛋白质(g)、碳水化合物(g)、脂肪(g)
+4. 给出0-1之间的置信度
+5. 给出一句简短的饮食建议
+
+必须严格按照以下JSON格式返回，不要添加任何其他文字：
+{"foods":[{"name":"食物名称","weight_g":200,"calories":300,"protein":15,"carbs":30,"fat":10,"confidence":0.85,"tips":"这是一道高蛋白低脂的健康食物"}]}
+
+场景信息: ${context || '未知场景'}
+请开始分析：`
               },
               {
                 type: 'image_url',
@@ -87,7 +97,7 @@ export async function POST(req: NextRequest) {
             ]
           }
         ],
-        max_tokens: 500,
+        max_tokens: 800,
       }),
     })
 
