@@ -5,8 +5,8 @@ import knowledgeBase from '@/lib/nutrition-knowledge.json'
 // export const runtime = 'edge' // Use default nodejs runtime for better compatibility
 
 const deepseek = createOpenAI({
-  baseURL: 'https://api.deepseek.com',
-  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.siliconflow.cn/v1',
+  apiKey: process.env.SILICON_FLOW_API_KEY,
 })
 
 // Map context to knowledge base tags
@@ -48,8 +48,8 @@ export async function POST(req: Request) {
   try {
     const { messages, context, macroDeficit, userProfile } = await req.json()
 
-    if (!process.env.DEEPSEEK_API_KEY) {
-      throw new Error('Missing DEEPSEEK_API_KEY')
+    if (!process.env.SILICON_FLOW_API_KEY) {
+      throw new Error('Missing SILICON_FLOW_API_KEY')
     }
 
     const userGoal = userProfile?.goal || '维持'
@@ -133,7 +133,7 @@ ${antiPatterns}
 `
 
     const result = streamText({
-      model: deepseek('deepseek-chat'),
+      model: deepseek('deepseek-ai/DeepSeek-V3'),
       messages,
       system: systemPrompt,
     })

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Using Silicon Flow API (OpenAI-compatible)
-    const model = siliconFlow('Pro/Qwen/Qwen2-VL-72B-Instruct')
+    const model = siliconFlow('Qwen/Qwen2-VL-72B-Instruct')
 
     console.log('[AI Service] Calling vision model for food recognition...')
     
