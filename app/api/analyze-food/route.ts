@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'Qwen/Qwen2-VL-7B-Instruct', // Use 7B for faster response
+        model: 'Qwen/Qwen2.5-VL-7B-Instruct',
         messages: [
           {
             role: 'user',

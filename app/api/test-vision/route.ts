@@ -24,7 +24,7 @@ export async function GET() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'Qwen/Qwen2-VL-7B-Instruct',
+        model: 'Qwen/Qwen2.5-VL-7B-Instruct',
         messages: [
           {
             role: 'user',
@@ -55,7 +55,7 @@ export async function GET() {
       success: true,
       message: '🎉 Vision API 连接成功!',
       aiResponse: aiMessage,
-      model: 'Qwen/Qwen2-VL-7B-Instruct'
+      model: 'Qwen/Qwen2.5-VL-7B-Instruct'
     })
 
   } catch (error: any) {
