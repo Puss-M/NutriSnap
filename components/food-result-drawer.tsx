@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { useAppStore, RecognizedFood } from '@/lib/store'
 import { getDeviceId } from '@/lib/supabase'
-import { Check, Flame, Beef, Wheat, Droplets } from 'lucide-react'
+import { Check, Flame, CircleDot } from 'lucide-react'
 
 interface FoodResultDrawerProps {
   open: boolean
@@ -142,21 +142,21 @@ export function FoodResultDrawer({ open, onClose, onSaved }: FoodResultDrawerPro
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-white/60 rounded-lg p-2">
                 <div className="flex items-center justify-center gap-1 text-pink-600">
-                  <Beef size={14} />
+                  <span>🥩</span>
                   <span className="font-bold">{totals.protein.toFixed(1)}g</span>
                 </div>
                 <span className="text-xs text-zinc-500">蛋白质</span>
               </div>
               <div className="bg-white/60 rounded-lg p-2">
                 <div className="flex items-center justify-center gap-1 text-amber-600">
-                  <Wheat size={14} />
+                  <span>🌾</span>
                   <span className="font-bold">{totals.carbs.toFixed(1)}g</span>
                 </div>
                 <span className="text-xs text-zinc-500">碳水</span>
               </div>
               <div className="bg-white/60 rounded-lg p-2">
                 <div className="flex items-center justify-center gap-1 text-orange-600">
-                  <Droplets size={14} />
+                  <span>💧</span>
                   <span className="font-bold">{totals.fat.toFixed(1)}g</span>
                 </div>
                 <span className="text-xs text-zinc-500">脂肪</span>
