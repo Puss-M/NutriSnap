@@ -190,7 +190,7 @@ export async function linkProfileToUser(userId: string, email: string): Promise<
     .select('*')
     .eq('device_id', deviceId)
     .is('user_id', null)
-    .single()
+    .maybeSingle()
   
   if (anonProfile) {
     // Link the anonymous profile to this user
