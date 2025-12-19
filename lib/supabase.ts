@@ -110,21 +110,44 @@ export function getDeviceId(): string {
 
 // Get or create user profile (supports both auth users and anonymous device users)
 export async function getUserProfile(): Promise<Profile | null> {
+  const deviceId = getDeviceId()
+  
   // First, check if user is logged in
   const user = await getUser()
   
   if (user) {
-    // Logged-in user: fetch by user_id
-    const { data: existing } = await supabase
+    // Logged-in user: first try to fetch by user_id
+    const { data: existingByUser } = await supabase
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)
       .single()
     
-    if (existing) return existing
+    if (existingByUser) return existingByUser
+    
+    // Fallback: check if there's a profile by device_id (from before login)
+    const { data: existingByDevice, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('device_id', deviceId)
+      .single()
+    
+    console.log('[getUserProfile] existingByDevice:', existingByDevice, 'error:', error)
+    
+    if (existingByDevice) {
+      // Link this profile to the authenticated user
+      const { data: updated, error: updateError } = await supabase
+        .from('profiles')
+        .update({ user_id: user.id, email: user.email })
+        .eq('id', existingByDevice.id)
+        .select()
+        .single()
+      
+      console.log('[getUserProfile] Linked profile to user:', updated, updateError)
+      return updated || existingByDevice
+    }
     
     // Create new profile for authenticated user
-    const deviceId = getDeviceId()
     const { data: newProfile } = await supabase
       .from('profiles')
       .insert({ 
@@ -138,14 +161,11 @@ export async function getUserProfile(): Promise<Profile | null> {
     return newProfile
   } else {
     // Anonymous user: use device_id
-    const deviceId = getDeviceId()
-    
     const { data: existing } = await supabase
       .from('profiles')
       .select('*')
       .eq('device_id', deviceId)
-      .is('user_id', null)
-      .single()
+      .maybeSingle()  // Use maybeSingle to avoid error if not found
     
     if (existing) return existing
     
