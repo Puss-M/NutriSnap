@@ -1,37 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOpenAI } from '@ai-sdk/openai'
-import { generateObject } from 'ai'
-import { z } from 'zod'
-import { FOOD_RECOGNITION_PROMPT } from '@/lib/prompts'
 import { getSuggestedFoods, calculateNutrition } from '@/lib/nutrition-db'
 
-// Schema for food recognition
-const foodSchema = z.object({
-  foods: z.array(z.object({
-    name: z.string(),
-    weight_g: z.number(),
-    calories: z.number(),
-    protein: z.number(),
-    carbs: z.number(),
-    fat: z.number(),
-    confidence: z.number(),
-    tips: z.string()
-  }))
-})
+export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
-// Configure Silicon Flow provider
-const siliconFlow = createOpenAI({
-  baseURL: 'https://api.siliconflow.cn/v1',
-  apiKey: process.env.SILICON_FLOW_API_KEY,
-})
+interface FoodItem {
+  name: string
+  weight_g: number
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  confidence: number
+  tips: string
+}
 
-/**
- * Generate mock food data from database when AI is unavailable
- */
-function getMockFoodData(context?: string): z.infer<typeof foodSchema> {
+function getMockFoodData(context?: string): { foods: FoodItem[] } {
   console.log('[AI Fallback] Using mock data from nutrition database')
   
-  // Get 1-3 suggested foods based on context
   const suggested = getSuggestedFoods(context || '', Math.floor(Math.random() * 2) + 1)
   
   const foods = suggested.map(item => {
@@ -43,7 +29,7 @@ function getMockFoodData(context?: string): z.infer<typeof foodSchema> {
       protein: nutrition.protein,
       carbs: nutrition.carbs,
       fat: nutrition.fat,
-      confidence: 0.6, // Mock confidence
+      confidence: 0.6,
       tips: `${item.category} - ${item.tags.join('、')}`
     }
   })
@@ -58,13 +44,12 @@ export async function POST(req: NextRequest) {
     requestBody = await req.json()
     const { image, context } = requestBody
     
-    // Input validation
     if (!image) {
       return NextResponse.json({ error: 'Image is required' }, { status: 400 })
     }
 
-    // Check API key
-    if (!process.env.SILICON_FLOW_API_KEY) {
+    const apiKey = process.env.SILICON_FLOW_API_KEY
+    if (!apiKey) {
       console.warn('[AI Service] SILICON_FLOW_API_KEY not configured, using mock data')
       return NextResponse.json({
         ...getMockFoodData(context),
@@ -73,40 +58,78 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Using Silicon Flow API (OpenAI-compatible)
-    const model = siliconFlow('Qwen/Qwen2-VL-72B-Instruct')
-
     console.log('[AI Service] Calling vision model for food recognition...')
-    
-    const result = await generateObject({
-      model,
-      schema: foodSchema,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: FOOD_RECOGNITION_PROMPT(context) },
-            { type: 'image', image }
-          ]
-        }
-      ],
-      maxRetries: 2,  // Retry up to 2 times on failure
+
+    // Direct API call to SiliconFlow Vision Model
+    const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'Qwen/Qwen2-VL-7B-Instruct', // Use 7B for faster response
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `请分析这张食物图片，用JSON格式返回结果。
+格式: {"foods":[{"name":"食物名","weight_g":重量,"calories":热量,"protein":蛋白质,"carbs":碳水,"fat":脂肪,"confidence":0.8,"tips":"一句话点评"}]}
+场景: ${context || '未知'}
+只返回JSON，不要其他文字。`
+              },
+              {
+                type: 'image_url',
+                image_url: { url: image }
+              }
+            ]
+          }
+        ],
+        max_tokens: 500,
+      }),
     })
 
-    console.log('[AI Service] Successfully recognized foods:', result.object.foods.length)
-    return NextResponse.json(result.object)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[AI Service] Vision API error:', response.status, errorText)
+      return NextResponse.json({
+        ...getMockFoodData(context),
+        _useMock: true,
+        _reason: `API Error: ${response.status}`
+      })
+    }
+
+    const data = await response.json()
+    const aiContent = data.choices?.[0]?.message?.content || ''
+    
+    console.log('[AI Service] Raw response:', aiContent)
+
+    // Try to parse JSON from response
+    try {
+      // Extract JSON from response (it might have extra text)
+      const jsonMatch = aiContent.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0])
+        if (parsed.foods && Array.isArray(parsed.foods)) {
+          console.log('[AI Service] Successfully recognized foods:', parsed.foods.length)
+          return NextResponse.json(parsed)
+        }
+      }
+    } catch (parseError) {
+      console.error('[AI Service] JSON parse error:', parseError)
+    }
+
+    // Fallback to mock if parsing fails
+    return NextResponse.json({
+      ...getMockFoodData(context),
+      _useMock: true,
+      _reason: 'AI response parse failed'
+    })
     
   } catch (error: any) {
-    // Detailed error logging
-    console.error('[AI Service] Food recognition error:', {
-      error: error.message,
-      name: error.name,
-      cause: error.cause,
-      context: requestBody.context
-    })
-    
-    // Graceful degradation: return mock data instead of error
-    console.log('[AI Service] Falling back to mock data due to error')
+    console.error('[AI Service] Food recognition error:', error.message)
     
     return NextResponse.json({
       ...getMockFoodData(requestBody.context),
