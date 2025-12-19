@@ -51,26 +51,39 @@ export function FoodResultDrawer({ open, onClose, onSaved }: FoodResultDrawerPro
     try {
       const deviceId = getDeviceId()
       
-      for (const food of adjustedFoods) {
-        await saveFoodLog({
+      // Use server-side API to bypass CORS issues
+      const response = await fetch('/api/save-food', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           device_id: deviceId,
-          food_name: food.name,
-          calories: food.calories,
-          protein: food.protein,
-          carbs: food.carbs,
-          fat: food.fat,
-          weight_g: food.weight_g,
-          image_url: currentImageUrl,
-          context_tag: currentContext,
-          confidence: food.confidence
+          foods: adjustedFoods.map(food => ({
+            device_id: deviceId,
+            food_name: food.name,
+            calories: food.calories,
+            protein: food.protein,
+            carbs: food.carbs,
+            fat: food.fat,
+            weight_g: food.weight_g,
+            image_url: currentImageUrl,
+            context_tag: currentContext,
+            confidence: food.confidence
+          }))
         })
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Save failed')
       }
       
+      console.log('[Save] Success:', data)
       onSaved?.()
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save error:', error)
-      alert('保存失败，请重试')
+      alert('保存失败: ' + (error.message || '请重试'))
     } finally {
       setIsSaving(false)
     }
