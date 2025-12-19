@@ -47,6 +47,34 @@ export function CameraCapture({ context, onAnalysisComplete, onPaywallTrigger }:
     return () => clearInterval(interval)
   }, [isAnalyzing])
 
+  // Compress image to reduce size for API
+  const compressImage = (base64: string, maxWidth = 800, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let width = img.width
+        let height = img.height
+        
+        // Scale down if too large
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        // Convert to JPEG with compression
+        const compressed = canvas.toDataURL('image/jpeg', quality)
+        resolve(compressed)
+      }
+      img.src = base64
+    })
+  }
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -54,8 +82,12 @@ export function CameraCapture({ context, onAnalysisComplete, onPaywallTrigger }:
     setAnalysisError(null)
     
     const reader = new FileReader()
-    reader.onload = (e) => {
-      setSelectedImage(e.target?.result as string)
+    reader.onload = async (e) => {
+      const original = e.target?.result as string
+      // Compress image before storing
+      const compressed = await compressImage(original, 800, 0.7)
+      console.log(`[Image] Compressed: ${(original.length / 1024).toFixed(0)}KB -> ${(compressed.length / 1024).toFixed(0)}KB`)
+      setSelectedImage(compressed)
     }
     reader.readAsDataURL(file)
   }
