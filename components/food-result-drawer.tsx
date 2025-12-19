@@ -90,7 +90,14 @@ export function FoodResultDrawer({ open, onClose, onSaved }: FoodResultDrawerPro
       }
       
       console.log('[Save] Success:', data)
-      onSaved?.()
+      console.log('[Drawer] About to call onSaved callback...')
+      if (onSaved) {
+        console.log('[Drawer] onSaved exists, calling it now')
+        await onSaved()
+        console.log('[Drawer] onSaved completed')
+      } else {
+        console.log('[Drawer] onSaved is undefined!')
+      }
       onClose()
     } catch (error: any) {
       console.error('Save error:', error)
