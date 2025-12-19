@@ -1,8 +1,9 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
-import { supabase, getUser, onAuthStateChange, signOut as authSignOut } from '@/lib/supabase'
+import { getUser, onAuthStateChange, signOut as authSignOut } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
@@ -20,9 +21,14 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
+// Routes that don't require authentication
+const publicRoutes = ['/login', '/signup']
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     // Get initial user
@@ -42,9 +48,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading) {
+      const isPublicRoute = publicRoutes.some(route => pathname?.startsWith(route))
+      
+      if (!user && !isPublicRoute) {
+        router.push('/login')
+      }
+    }
+  }, [user, loading, pathname, router])
+
   const handleSignOut = async () => {
     await authSignOut()
     setUser(null)
+    router.push('/login')
+  }
+
+  // Show nothing while checking auth to prevent flash
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="animate-pulse text-zinc-400">加载中...</div>
+      </div>
+    )
   }
 
   return (
@@ -53,3 +80,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   )
 }
+
