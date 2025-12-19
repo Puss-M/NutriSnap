@@ -3,9 +3,9 @@ import { streamText } from 'ai'
 
 // export const runtime = 'edge' // Use default nodejs runtime for better compatibility
 
-const siliconFlow = createOpenAI({
-  baseURL: 'https://api.siliconflow.cn/v1',
-  apiKey: process.env.SILICON_FLOW_API_KEY,
+const deepseek = createOpenAI({
+  baseURL: 'https://api.deepseek.com',
+  apiKey: process.env.DEEPSEEK_API_KEY,
 })
 
 // Simulated Knowledge Base (RAG)
@@ -35,8 +35,8 @@ export async function POST(req: Request) {
   try {
     const { messages, context, macroDeficit, userProfile } = await req.json()
 
-    if (!process.env.SILICON_FLOW_API_KEY) {
-      throw new Error('Missing SILICON_FLOW_API_KEY')
+    if (!process.env.DEEPSEEK_API_KEY) {
+      throw new Error('Missing DEEPSEEK_API_KEY')
     }
 
     // Construct System Prompt with specific user context
@@ -71,7 +71,7 @@ ${DIET_KNOWLEDGE_BASE}
 `
 
     const result = streamText({
-      model: siliconFlow('deepseek-ai/DeepSeek-V2.5'),
+      model: deepseek('deepseek-chat'),
       messages,
       system: systemPrompt,
     })
