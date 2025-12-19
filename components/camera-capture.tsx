@@ -107,7 +107,7 @@ export function CameraCapture({ context, onAnalysisComplete, onPaywallTrigger }:
 
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 25000) // 25s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s timeout
 
       const response = await fetch('/api/analyze-food', {
         method: 'POST',
