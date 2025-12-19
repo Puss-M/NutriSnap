@@ -1,8 +1,10 @@
 {
-  "crons": [
-    {
-      "path": "/api/cleanup-images",
-      "schedule": "0 3 * * *"
+  "functions": {
+    "app/api/analyze-food/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/test-vision/route.ts": {
+      "maxDuration": 60
     }
-  ]
+  }
 }

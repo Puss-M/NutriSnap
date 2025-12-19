@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSuggestedFoods, calculateNutrition } from '@/lib/nutrition-db'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 30
+export const maxDuration = 60
 
 interface FoodItem {
   name: string
