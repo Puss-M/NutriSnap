@@ -1,5 +1,8 @@
 # 🍽️ NutriSnap AI
 
+[![CI](https://github.com/Puss-M/NutriSnap/actions/workflows/ci.yml/badge.svg)](https://github.com/Puss-M/NutriSnap/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > 极速记录 + 场景化决策的智能饮食助手
 
 一款基于视觉 AI 的饮食管理 PWA，帮助大学生和年轻白领在便利店、食堂、外卖等场景下，快速识别热量并获得即时选购建议。
